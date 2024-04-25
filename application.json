@@ -1,0 +1,10 @@
+{
+  "name" : "db",
+  "version" : "1.0.0",
+  "dependencies" : [
+    {
+      "name" : "ezcache",
+      "version" : "1.0.0"
+    }
+  ]
+}
