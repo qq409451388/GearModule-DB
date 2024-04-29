@@ -2,6 +2,7 @@
 class MySqlSE extends BaseDBSimple implements IDbSe
 {
     private $mysqli;
+    private $conn;
     private $database;
 
     protected function initExpireTime(){
@@ -31,11 +32,11 @@ class MySqlSE extends BaseDBSimple implements IDbSe
             $sqlOptions = SqlOptions::new();
         }
         $cache = CacheFactory::getInstance(CacheFactory::TYPE_MEM);
-        $key = $this->database . ":" . $sqlTemplate . ":" . json_encode($binds). ":".EzDataUtils::toString($sqlOptions);
+        $key = $this->database . ":" . $sqlTemplate . ":" . json_encode($binds). ":".EzObjectUtils::toString($sqlOptions);
         if ($sqlOptions->getUseCache()) {
             $value = $cache->get($key);
             if (!empty($value)) {
-                return EzCollectionUtils::decodeJson($value);
+                return EzCodecUtils::decodeJson($value);
             }
         }
         $this->trace->start();
@@ -57,7 +58,7 @@ class MySqlSE extends BaseDBSimple implements IDbSe
         }
         $result = $query ? $query->fetch_all(MYSQLI_ASSOC) : [];
         if ($sqlOptions->getUseCache()) {
-            $cache->set($key, EzString::encodeJson($result));
+            $cache->set($key, EzCodecUtils::encodeJson($result));
         }
         return $result;
     }
@@ -230,7 +231,7 @@ class MySqlSE extends BaseDBSimple implements IDbSe
                 $value = $value->getJson();
                 $value = trim(json_encode($value), "\"");
             } else if (in_array($column, $jsonKeys)) {
-                $value = EzString::encodeJson($value);
+                $value = EzCodecUtils::encodeJson($value);
                 $value = str_replace("\"", "\\\"", $value);
             } else {
                 //$value = htmlentities($value);
@@ -283,50 +284,50 @@ class MySqlSE extends BaseDBSimple implements IDbSe
         switch ($type) {
             case "char":
             case "varchar":
-                DBC::assertLessThan($length, strlen($v), "[DB Exception] Column $k Length Must Less Than $length but sent ".EzDataUtils::toString($v));
+                DBC::assertLessThan($length, strlen($v), "[DB Exception] Column $k Length Must Less Than $length but sent ".EzObjectUtils::toString($v));
                 break;
             case "text":
                 $valueActualLen = $v instanceof SqlJsonDataItem ? $v->getJsonLength() : strlen($v);
-                DBC::assertLessThan(65535, $valueActualLen, "[DB Exception] Column $k Length Must Less Than 65535 but sent ".EzDataUtils::toString($v));
+                DBC::assertLessThan(65535, $valueActualLen, "[DB Exception] Column $k Length Must Less Than 65535 but sent ".EzObjectUtils::toString($v));
                 break;
             case "tinyint":
                 DBC::assertNumeric($v, "[DB Exception] Column $k Must Be Numeric");
                 if ($unsigned) {
-                    DBC::assertInRange("[0, 256)", $v, "[DB Exception] The value of Column $k Must in range 0~255 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[0, 256)", $v, "[DB Exception] The value of Column $k Must in range 0~255 but sent ".EzObjectUtils::toString($v));
                 } else {
-                    DBC::assertInRange("[-128, 128)", $v, "[DB Exception] The value of Column $k Must in range -128~127 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[-128, 128)", $v, "[DB Exception] The value of Column $k Must in range -128~127 but sent ".EzObjectUtils::toString($v));
                 }
                 break;
             case "int":
                 DBC::assertNumeric($v, "[DB Exception] Column $k Must Be Numeric");
                 if ($unsigned) {
-                    DBC::assertInRange("[0, 4294967296)", $v, "[DB Exception] The value of Column $k Must in range 0~4294967295 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[0, 4294967296)", $v, "[DB Exception] The value of Column $k Must in range 0~4294967295 but sent ".EzObjectUtils::toString($v));
                 } else {
-                    DBC::assertInRange("[-2147483648, 2147483648)", $v, "[DB Exception] The value of Column $k Must in range -2147483648~2147483647 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[-2147483648, 2147483648)", $v, "[DB Exception] The value of Column $k Must in range -2147483648~2147483647 but sent ".EzObjectUtils::toString($v));
                 }
                 break;
             case "smallint":
                 DBC::assertNumeric($v, "[DB Exception] Column $k Must Be Numeric");
                 if ($unsigned) {
-                    DBC::assertInRange("[0, 65536)", $v, "[DB Exception] The value of Column $k Must in range 0~65535 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[0, 65536)", $v, "[DB Exception] The value of Column $k Must in range 0~65535 but sent ".EzObjectUtils::toString($v));
                 } else {
-                    DBC::assertInRange("[-32768, 32768)", $v, "[DB Exception] The value of Column $k Must in range -32768~32767 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[-32768, 32768)", $v, "[DB Exception] The value of Column $k Must in range -32768~32767 but sent ".EzObjectUtils::toString($v));
                 }
                 break;
             case "mediumint":
                 DBC::assertNumeric($v, "[DB Exception] Column $k Must Be Numeric");
                 if ($unsigned) {
-                    DBC::assertInRange("[0,16777216)", $v, "[DB Exception] The value of Column $k Must in range 0~16777215 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[0,16777216)", $v, "[DB Exception] The value of Column $k Must in range 0~16777215 but sent ".EzObjectUtils::toString($v));
                 } else {
-                    DBC::assertInRange("[-8388608,8388608)", $v, "[DB Exception] The value of Column $k Must in range -8388608~8388607 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[-8388608,8388608)", $v, "[DB Exception] The value of Column $k Must in range -8388608~8388607 but sent ".EzObjectUtils::toString($v));
                 }
                 break;
             case "bigint":
                 DBC::assertNumeric($v, "[DB Exception] Column $k Must Be Numeric");
                 if ($unsigned) {
-                    DBC::assertInRange("[0,18446744073709551615)", $v, "[DB Exception] The value of Column $k Must in range 0~18446744073709551615 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[0,18446744073709551615)", $v, "[DB Exception] The value of Column $k Must in range 0~18446744073709551615 but sent ".EzObjectUtils::toString($v));
                 } else {
-                    DBC::assertInRange("[-9223372036854775808,9223372036854775808)", $v, "[DB Exception] The value of Column $k Must in range -9223372036854775808~9223372036854775808 but sent ".EzDataUtils::toString($v));
+                    DBC::assertInRange("[-9223372036854775808,9223372036854775808)", $v, "[DB Exception] The value of Column $k Must in range -9223372036854775808~9223372036854775808 but sent ".EzObjectUtils::toString($v));
                 }
                 break;
             case "datetime":
