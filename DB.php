@@ -19,6 +19,10 @@ class DB{
         DBC::throwEx('[Mysql Exception]null database:'.$database);
     }
 
+    public static function getInstance($database, $env = null) {
+        return self::get($database, $env);
+    }
+
     private function getDbConfig($database, $env = null)
     {
         $this->dbCon = Config::getRecursion('db');
