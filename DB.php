@@ -1,5 +1,5 @@
 <?php
-class DB{
+class DB extends EzObject {
     private static $ins = null;
     private $map = [];
 	private $dbCon = [];
