@@ -181,7 +181,6 @@ class MySqlSE extends BaseDBSimple implements IDbSe
         $columns = array_column($dbInfo, "Field");
         $this->preCheckUnknowKeys4Write($columns, $info);
         $this->prepare($dbInfo, $info);
-        var_dump($info);
         $this->checkFields($dbInfo, $info);
     }
 
@@ -220,7 +219,7 @@ class MySqlSE extends BaseDBSimple implements IDbSe
             if (is_null($value)) {
                 continue;
             }
-            DBC::assertTrue(!in_array($column, $jsonKeys) || is_array($value),
+            DBC::assertTrue(!in_array($column, $jsonKeys) || (EzCheckUtils::isJson($value) || is_array($value)),
                 "[DB Exception] Column $column DataType is json And The value must be an array");
             if(in_array($column, $timeStampKeys) && empty($value)){
                 $value = "1970-00-00 00:00:00";
@@ -231,7 +230,7 @@ class MySqlSE extends BaseDBSimple implements IDbSe
                 $value = $value->getJson();
                 $value = trim(json_encode($value), "\"");
             } else if (in_array($column, $jsonKeys)) {
-                $value = EzCodecUtils::encodeJson($value);
+                $value = EzCheckUtils::isJson($value) ? $value : EzCodecUtils::encodeJson($value);
                 $value = str_replace("\"", "\\\"", $value);
             } else {
                 //$value = htmlentities($value);
@@ -336,6 +335,9 @@ class MySqlSE extends BaseDBSimple implements IDbSe
                 DBC::assertTrue(EzDateUtils::isValid($v), "[DB Exception] Column $k Must Be A Valid Datetime");
                 break;
             case "decimal":
+                break;
+            case "json":
+                //DBC::assertTrue(EzCheckUtils::isJson($v), "[DB Exception] Column $k Must Be Json");
                 break;
             default:
                 Logger::warn("[DB Exception] Column $k Type {$fieldInfo['Type']} Not Check, sendType $type");
