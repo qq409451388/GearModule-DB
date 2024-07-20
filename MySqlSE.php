@@ -151,7 +151,6 @@ class MySqlSE extends BaseDBSimple implements IDbSe
             $singleString .= " and ".$appendSignleString;
         }
         $sql = "update $table set ".$setString." where ".$singleString;
-        var_dump($sql);
         Logger::save($sql.";".PHP_EOL, $table);
         return $this->query($sql, []);
     }
