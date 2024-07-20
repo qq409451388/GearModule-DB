@@ -136,6 +136,7 @@ class MySqlSE extends BaseDBSimple implements IDbSe
     public function update(string $table, array $info, string $singleKey = 'id', string $appendSignleString = ""):bool{
         DBC::assertTrue(key_exists($singleKey, $info),
             "[DB Exception] Update Statement Must Have A Limit Sql String In Where!");
+        $this->preCheck4Write($table, $info);
         $singleString = $setString = "";
         foreach($info as $k => $v){
             $v = is_numeric($v) ? $v : "'".$v."'";
@@ -150,6 +151,7 @@ class MySqlSE extends BaseDBSimple implements IDbSe
             $singleString .= " and ".$appendSignleString;
         }
         $sql = "update $table set ".$setString." where ".$singleString;
+        var_dump($sql);
         Logger::save($sql.";".PHP_EOL, $table);
         return $this->query($sql, []);
     }
