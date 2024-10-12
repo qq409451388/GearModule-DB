@@ -23,7 +23,7 @@ class DB extends EzObject {
         return self::get($database, $env);
     }
 
-    private function getDbConfig($database, $env = null)
+    private function getDbConfig($database, $env = null):DbConfiguration
     {
         $this->dbCon = Config::getRecursion('db');
         if(is_null($env)){
@@ -34,7 +34,12 @@ class DB extends EzObject {
             DBC::throwEx("[DB] Null DB Config");
         }
         $sysName = $this->getSysName($database);
-        return $this->dbCon[$sysName];
+        $config = $this->dbCon[$sysName];
+        /**
+         * @var DbConfiguration $dbConfiguration
+         */
+        $dbConfiguration = EzObjectUtils::create($config, DbConfiguration::class);
+        return $dbConfiguration;
     }
 
     public static function get($database = '', $env = null):IDbSe
@@ -63,7 +68,10 @@ class DB extends EzObject {
     private function getDB($database = '', $env = null):IDbSe
     {
         $dbConfig = self::getDbConfig($database, $env);
-        $dbType = $dbConfig['dbType'] ?? '';
+        if (BeanFinder::get()->has(DbConfiguration::class)) {
+            $dbConfig = BeanFinder::get()->pull(DbConfiguration::class);
+        }
+        $dbType = $dbConfig->dbType ?? '';
         /**
          * @var IDbSe $se
          */
@@ -79,6 +87,6 @@ class DB extends EzObject {
             default:
                 DBC::throwEx("[DB]Unknow Db-Type:$dbType");
         }
-        return $se->init($dbConfig['host'], $dbConfig['port']??3306, $dbConfig['user'], $dbConfig['pwd'], $database);
+        return $se->init($dbConfig->host, $dbConfig->port, $dbConfig->user, $dbConfig->pwd, $database);
     }
 }
