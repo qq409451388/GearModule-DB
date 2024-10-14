@@ -13,8 +13,8 @@ interface IDbSe
     public function save(string $table, array $info):bool;
     public function saveList(string $table, array $infos):bool;
 
-    public function update(string $table, array $info, string $singleKey = ''):bool;
-    public function updateList(string $table, array $infos, string $singleKey = ''):array;
+    public function update(string $table, array $info, string $singleKey = '', string $appendSignleString = ""):bool;
+    public function updateList(string $table, array $infos, string $singleKey = '', string $appendSignleString = ""):array;
 
     public function delete(string $table, int $id):bool;
     public function deleteBatch(string $table, array $id):bool;
