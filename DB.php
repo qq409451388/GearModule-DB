@@ -44,6 +44,7 @@ class DB extends EzObject {
 
     public static function get($database = '', $env = null):IDbSe
     {
+        DBC::assertNotEmpty($database, "[DB] Null DB");
         if(null == self::$ins)
         {
             self::$ins = new self();

@@ -16,6 +16,7 @@ class MySqlSE extends BaseDBSimple implements IDbSe
             DBC::throwEx('[Mysql Exception] unselect db.', -1);
         }
         $this->mysqli = mysqli_init();
+
         $this->conn = $this->mysqli->real_connect($host, $user, $pwd, $database, $port);
         if(0 != $this->mysqli->connect_errno)
         {
@@ -46,10 +47,8 @@ class MySqlSE extends BaseDBSimple implements IDbSe
         }
         $query = $this->mysqli->query($this->sql);
         $this->trace->finishAndlog($this->sql, __CLASS__."@".$this->database);
-        if (0 != $this->mysqli->errno) {
-            $msg = '[Mysql Exception]code:' . $this->mysqli->errno . ',msg:' . $this->mysqli->error;
-            DBC::throwEx($msg, $this->mysqli->errno);
-        }
+        $msg = '[Mysql Exception]code:' . $this->mysqli->errno . ',msg:' . $this->mysqli->error;
+        DBC::assertEquals(0, $this->mysqli->errno, $msg);
 
         //for insert update delete
         if (is_bool($query))
